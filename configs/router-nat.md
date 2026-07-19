@@ -23,13 +23,13 @@ ip route 0.0.0.0 0.0.0.0 200.0.0.1
 ## Configuration des interfaces
 
 ```cisco
-interface GigabitEthernet1/0
- ip address 200.0.0.2 255.255.255.252
+interface GigabitEthernet2/0
+ ip address 200.0.0.1 255.255.255.252
  ip nat outside
  ip access-group ACL-NAT-OUTSIDE in
  no shutdown
 !
-interface GigabitEthernet2/0
+interface GigabitEthernet1/0
  ip address 10.1.2.2 255.255.255.252
  ip nat inside
  ip access-group ACL-NAT-INSIDE in
