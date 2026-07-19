@@ -27,24 +27,64 @@ Ce lab a pour but de pratiquer la sécurité réseau dans un environnement réal
 
 ### Vue d'ensemble
 
+```mermaid
+%%{init: {'flowchart': {'nodeSpacing': 80, 'rankSpacing': 90, 'padding': 25}}}%%
+flowchart TB
+    INTERNET[["🌐 WAN / Internet"]]
+    RTR_INT["Routeur Internet<br/>200.0.0.1"]
+    RTR_NAT["Routeur NAT<br/>200.0.0.2 / 10.1.2.2"]
+    FW{{"Firewall<br/>10.1.2.1 / 10.1.1.2 / 172.16.0.254"}}
+    SWL3["SWL3 Cœur Réseau<br/>10.1.1.1"]
+
+    INTERNET --- RTR_INT
+    RTR_INT -->|"200.0.0.0/30"| RTR_NAT
+    RTR_NAT -->|"10.1.2.0/30"| FW
+    FW -->|"10.1.1.0/30"| SWL3
+
+    subgraph DMZ["DMZ — 172.16.0.0/24"]
+        DNS[("PowerDNS<br/>.53")]
+        WEB1[("WEB<br/>.25")]
+        CONF[("Conférence<br/>.63")]
+    end
+    FW --- DMZ
+
+    subgraph V10["VLAN 10 — Users<br/>192.168.10.0/24"]
+        USERS(["Postes utilisateurs"])
+    end
+
+    subgraph V20["VLAN 20 — Info/SIEM<br/>192.168.20.0/24"]
+
+        SIEM[("Wazuh SIEM<br/>.100")]
+        VPN[("SSH/OpenVPN<br/>.10")]
+    end
+
+    subgraph V30["VLAN 30 — Serveur<br/>192.168.30.0/24"]
+
+        DHCP[("Kea DHCP<br/>.110")]
+        WEB2[("WEB<br/>.150")]
+    end
+
+    SWL3 --- V10
+    SWL3 --- V20
+    SWL3 --- V30
+
+    classDef network fill:#1a1a2e,stroke:#4dabf7,stroke-width:1.5px,color:#fff
+    classDef firewall fill:#1a1a2e,stroke:#e64980,stroke-width:1.5px,color:#fff
+    classDef service fill:#1a1a2e,stroke:#20c997,stroke-width:1.5px,color:#fff
+    classDef users fill:#1a1a2e,stroke:#845ef7,stroke-width:1.5px,color:#fff
+
+    class RTR_INT,RTR_NAT,SWL3 network
+    class FW firewall
+    class DNS,WEB1,CONF,SIEM,VPN,DHCP,WEB2 service
+    class USERS users
+
+    style DMZ fill:#0d0d1a,stroke:#845ef7,stroke-width:1.5px,color:#fff
+    style V10 fill:#0d0d1a,stroke:#4dabf7,stroke-width:1.5px,color:#fff
+    style V20 fill:#0d0d1a,stroke:#20c997,stroke-width:1.5px,color:#fff
+    style V30 fill:#0d0d1a,stroke:#e64980,stroke-width:1.5px,color:#fff
 ```
-[WAN / Internet]
-      |
-  Routeur Internet (10.0.X.X / 200.0.0.1)
-      |  200.0.0.0/30
-  Routeur NAT (200.0.0.2 / 10.1.2.2)
-      |  10.1.2.0/30
-  Firewall (10.1.2.1 / 10.1.1.2 / 172.16.0.254)
-      |
-  ┌───┴───────────────┐
-  |                   |
-SWL3 CœurReseau     DMZ (172.16.0.0/24)
-(10.1.1.1)           ├── DNS       172.16.0.53
-  |                  ├── WEB       172.16.0.25
-  ├── SW1 — VLAN 10 (Users)    192.168.10.0/24
-  ├── SW2 — VLAN 20 (Info/SIEM) 192.168.20.0/24
-  └── SW3 — VLAN 30 (Serveur)  192.168.30.0/24
-```
+
+
 
 ### Plan d'adressage
 
